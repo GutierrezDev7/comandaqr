@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useOrder } from '../../contexts/OrderContext';
-import { ArrowLeft, Trash2, ShoppingBag } from 'lucide-react';
+import { ArrowLeft, Trash2, ShoppingBag, Pencil, Check } from 'lucide-react';
 import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
 
 const statusConfig = {
@@ -12,7 +13,9 @@ const statusConfig = {
 function OrderSummary() {
   const { tableId } = useParams<{ tableId: string }>();
   const navigate = useNavigate();
-  const { currentOrder, removeItem } = useOrder();
+  const { currentOrder, removeItem, updateItemObservations } = useOrder();
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [obsText, setObsText] = useState<string>('');
 
   if (!currentOrder || currentOrder.items.length === 0) {
     return (
@@ -91,11 +94,45 @@ function OrderSummary() {
                   </div>
                 )}
 
-                {/* Observations */}
+                {/* Observações */}
                 {item.observations && (
-                  <p className="text-gray-600 text-sm mb-2">
-                    Obs: {item.observations}
-                  </p>
+                  <p className="text-gray-600 text-sm mb-2">Obs: {item.observations}</p>
+                )}
+                {item.status !== 'delivered' && (
+                  <div className="mb-2">
+                    {editingId === item.id ? (
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={obsText}
+                          onChange={(e)=>setObsText(e.target.value)}
+                          placeholder="Adicionar observação (ex: sem gelo, pouco sal)"
+                          className="flex-1 px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:outline-none text-sm"
+                        />
+                        <button
+                          onClick={() => {
+                            updateItemObservations(item.id, obsText.trim());
+                            setEditingId(null);
+                            setObsText('');
+                          }}
+                          className="px-3 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm"
+                        >
+                          <Check className="size-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setEditingId(item.id);
+                          setObsText(item.observations || '');
+                        }}
+                        className="text-gray-600 hover:text-orange-600 text-sm flex items-center gap-1"
+                      >
+                        <Pencil className="size-4" />
+                        {item.observations ? 'Editar observação' : 'Adicionar observação'}
+                      </button>
+                    )}
+                  </div>
                 )}
 
                 {/* Status and Actions */}

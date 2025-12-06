@@ -9,6 +9,8 @@ function Payment() {
   const { tableId } = useParams<{ tableId: string }>();
   const [searchParams] = useSearchParams();
   const method = searchParams.get('method');
+  const amountParam = parseFloat(searchParams.get('amount') || '');
+  const tipParam = parseFloat(searchParams.get('tip') || '');
   const navigate = useNavigate();
   const { currentOrder, completePayment } = useOrder();
   const [copied, setCopied] = useState(false);
@@ -21,7 +23,10 @@ function Payment() {
   }, [currentOrder, navigate, tableId]);
 
   const serviceFee = currentOrder ? currentOrder.total * 0.1 : 0;
-  const total = currentOrder ? currentOrder.total + serviceFee : 0;
+  const orderTotal = currentOrder ? currentOrder.total + serviceFee : 0;
+  const amount = !isNaN(amountParam) && amountParam > 0 ? amountParam : orderTotal;
+  const tip = !isNaN(tipParam) && tipParam >= 0 ? tipParam : 0;
+  const total = amount + tip;
 
   // Mock PIX code
   const pixCode = `00020126580014br.gov.bcb.pix0136${currentOrder?.id ?? ''}520400005303986540${total.toFixed(
@@ -81,6 +86,7 @@ function Payment() {
                 <QRCode value={pixCode} size={200} />
               </div>
               <div className="text-gray-900 mb-2">R$ {total.toFixed(2)}</div>
+              <div className="text-gray-600 text-sm mb-2">Subtotal: R$ {amount.toFixed(2)} • Gorjeta: R$ {tip.toFixed(2)}</div>
               <p className="text-gray-600 text-center mb-6">
                 Escaneie o QR Code com o app do seu banco
               </p>
@@ -192,6 +198,10 @@ function Payment() {
             <div className="flex items-center justify-between">
               <span className="text-gray-600">Total a pagar</span>
               <div className="text-orange-600">R$ {total.toFixed(2)}</div>
+            </div>
+            <div className="flex items-center justify-between mt-2 text-sm text-gray-600">
+              <span>Detalhes</span>
+              <span>Subtotal: R$ {amount.toFixed(2)} • Gorjeta: R$ {tip.toFixed(2)}</span>
             </div>
           </div>
 

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { LogIn, AlertCircle } from 'lucide-react';
 import { establishment } from '../../data/mockData';
+import QuickStartGuide from '../../components/QuickStartHGuide';
 
 function AdminLogin() {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ function AdminLogin() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,7 +22,7 @@ function AdminLogin() {
     try {
       await login(email, password);
       navigate('/admin/dashboard');
-    } catch (err) {
+    } catch {
       setError('Email ou senha inválidos');
     } finally {
       setLoading(false);
@@ -28,7 +30,7 @@ function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen  from-gray-900 to-gray-800 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
         <div className="bg-white rounded-3xl shadow-2xl p-8">
           {/* Logo */}
@@ -80,12 +82,21 @@ function AdminLogin() {
               {loading ? 'Entrando...' : 'Entrar'}
             </button>
 
-            <div className="text-center">
-              <a href="#" className="text-orange-600 hover:underline text-sm">
-                Esqueci minha senha
-              </a>
-            </div>
-          </form>
+          <div className="text-center">
+            <a href="#" className="text-orange-600 hover:underline text-sm">
+              Esqueci minha senha
+            </a>
+          </div>
+          <div className="text-center mt-3">
+            <button
+              type="button"
+              onClick={() => setShowGuide(true)}
+              className="text-gray-600 hover:text-orange-600 text-sm"
+            >
+              Guia Rápido
+            </button>
+          </div>
+        </form>
 
           {/* Demo Credentials */}
           <div className="mt-6 pt-6 border-t">
@@ -124,6 +135,7 @@ function AdminLogin() {
           </div>
         </div>
       </div>
+      {showGuide && <QuickStartGuide onClose={() => setShowGuide(false)} />}
     </div>
   );
 }

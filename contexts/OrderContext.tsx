@@ -30,6 +30,7 @@ interface OrderContextType {
   addItem: (item: Omit<OrderItem, 'id' | 'status'>) => void;
   removeItem: (itemId: string) => void;
   updateItemStatus: (itemId: string, status: OrderItem['status']) => void;
+  updateItemObservations: (itemId: string, observations: string) => void;
   createOrder: (tableId: string, customerId: string, customerName: string) => void;
   getOrder: (tableId: string) => Order | null;
   completePayment: (orderId: string) => void;
@@ -124,6 +125,26 @@ export function OrderProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const updateItemObservations = (itemId: string, observations: string) => {
+    setOrders((prev) =>
+      prev.map((order) => ({
+        ...order,
+        items: order.items.map((item) =>
+          item.id === itemId ? { ...item, observations } : item
+        ),
+      }))
+    );
+
+    if (currentOrder) {
+      setCurrentOrder({
+        ...currentOrder,
+        items: currentOrder.items.map((item) =>
+          item.id === itemId ? { ...item, observations } : item
+        ),
+      });
+    }
+  };
+
   const getOrder = (tableId: string) => {
     return orders.find((o) => o.tableId === tableId && o.status === 'active') || null;
   };
@@ -146,6 +167,7 @@ export function OrderProvider({ children }: { children: ReactNode }) {
         addItem,
         removeItem,
         updateItemStatus,
+        updateItemObservations,
         createOrder,
         getOrder,
         completePayment,
